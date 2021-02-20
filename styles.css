@@ -1,0 +1,16 @@
+svg {
+  overflow: visible;
+}
+
+line {
+  stroke: black;
+  stroke-width: 0.2rem;
+}
+
+.player-1 {
+  fill: steelblue;
+}
+
+.player-2 {
+  fill: red;
+}
