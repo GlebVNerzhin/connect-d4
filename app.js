@@ -18,7 +18,12 @@ const lineGrid = [
   return [...a, ...dimension];
 }, []);
 
-const svg = d3.selectAll("svg").attr("width", WIDTH).attr("height", HEIGHT);
+const svg = d3
+  .select("body")
+  .append("div")
+  .attr("class", "container")
+  .append("svg")
+  .attr("viewBox", `0 0 ${WIDTH} ${HEIGHT}`);
 
 const yAxisRows = (d) => d * rowLength;
 const xAxisColumns = (d) => d * columnLength;

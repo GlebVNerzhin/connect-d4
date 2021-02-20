@@ -1,3 +1,10 @@
+body {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 svg {
   overflow: visible;
 }
@@ -13,4 +20,14 @@ line {
 
 .player-2 {
   fill: red;
+}
+
+.container {
+  width: 50%;
+}
+
+@media only screen and (max-width: 480px) {
+  .container {
+    width: 90%;
+  }
 }
