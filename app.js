@@ -42,10 +42,13 @@ svg
 
 const getCenter = (target, length) => target * length - length / 2;
 
-const render = (selection, moves) => {
-  selection
+const moveGroup = svg.append("g");
+const winnerGroup = svg.append("g");
+
+const renderMoves = (moves) => {
+  moveGroup
     .selectAll("circle")
-    .data(moves, (move) => move.target)
+    .data(moves)
     .join("circle")
     .attr("class", (move) => move.player)
     .attr("r", (2 / 3) * ((columnLength + rowLength) / 4))
@@ -55,6 +58,20 @@ const render = (selection, moves) => {
     .attr("cy", (move) => getCenter(move.target[0], rowLength));
 };
 
+const renderWin = (winner) => {
+  winnerGroup
+    .selectAll("circle")
+    .data(winner.lane)
+    .join("circle")
+    .attr("class", winner.player)
+    .attr("r", (2 / 3) * ((columnLength + rowLength) / 4))
+    .attr("cx", (cell) => getCenter(cell[1], columnLength))
+    .attr("cy", (cell) => getCenter(cell[0], rowLength))
+    .transition()
+    .duration(1000)
+    .attr("r", (columnLength + rowLength) / 4);
+};
+
 let allowMove = true;
 
 const handleKeydown = (e) => {
@@ -62,7 +79,6 @@ const handleKeydown = (e) => {
   column = parseInt(e.key);
   if (!column | (column > COLUMNS)) return;
   allowMove = false;
-  setTimeout(() => (allowMove = true), ANIMTATION_DURATION);
   move(column);
 };
 
@@ -76,9 +92,16 @@ const move = (column) => {
   const row = columnState.length
     ? d3.min(columnState, (cell) => cell[0]) - 1
     : ROWS;
-  moves.push({ player: player, target: [row, column] });
-  render(svg, moves);
-  console.log(checkForWinningLane());
+  if (row < 1) return;
+  moves.push({ player, target: [row, column] });
+  const moveDuration = (moves[moves.length - 1].target[0] / ROWS) * 1000;
+  renderMoves(moves, moveDuration);
+  const winningLane = checkForWinningLane();
+  if (!winningLane) {
+    setTimeout(() => (allowMove = true), moveDuration);
+    return;
+  }
+  setTimeout(() => renderWin({ player, lane: winningLane }), moveDuration);
 };
 
 const checkForWinningLane = () => {
