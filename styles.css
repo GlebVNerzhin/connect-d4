@@ -14,9 +14,13 @@ line {
   stroke-width: 0.2rem;
 }
 
-text {
+.column-number {
   font-size: xx-large;
   text-anchor: middle;
+}
+
+.move-indicator {
+  font-size: x-large;
 }
 
 .row-buttons {
@@ -45,6 +49,7 @@ text {
 
 #info {
   font-size: larger;
+  margin-top: 5%;
 }
 
 #play-again {

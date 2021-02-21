@@ -15,7 +15,7 @@ const COLUMNS = 7;
 const ROWS = 6;
 const WINNING_SCORE = 4;
 const ANIMTATION_DURATION = 1000;
-const MARGIN_BOTTOM = hasTouchScreen ? 0 : 50;
+const MARGIN_BOTTOM = hasTouchScreen ? 50 : 100;
 
 let isAllowedToMove = true;
 let moves = [];
@@ -60,14 +60,37 @@ const getCenter = (target, length) => target * length - length / 2;
 if (!hasTouchScreen) {
   const labelGroup = svg
     .append("g")
-    .attr("transform", `translate(0, ${INNER_HEIGHT + MARGIN_BOTTOM / 1.5})`);
+    .attr("transform", `translate(0, ${INNER_HEIGHT + MARGIN_BOTTOM / 2})`);
   labelGroup
     .selectAll("text")
     .data(columns)
     .join("text")
+    .attr("class", "column-number")
     .attr("x", (d) => getCenter(d, columnLength))
     .text((d) => d);
 }
+
+const moveIndicator = svg
+  .append("g")
+  .attr(
+    "transform",
+    `translate(0, ${
+      hasTouchScreen
+        ? INNER_HEIGHT + MARGIN_BOTTOM
+        : INNER_HEIGHT + MARGIN_BOTTOM + 5
+    })`
+  );
+
+const moveIndicatorText = moveIndicator
+  .append("text")
+  .attr("class", "move-indicator")
+  .text("Next Move");
+const moveIndicatorCircle = moveIndicator
+  .append("circle")
+  .attr("cx", 150)
+  .attr("cy", -8.5)
+  .attr("r", 25)
+  .attr("class", "player-1");
 
 const upperRowButtonGroup = svg.append("g").attr("class", "row-buttons");
 upperRowButtonGroup
@@ -135,7 +158,19 @@ const move = (column) => {
   renderMoves(moves, moveDuration);
   const winningLane = checkForWinningLane();
   if (!winningLane) {
-    setTimeout(() => (isAllowedToMove = true), moveDuration);
+    if (moves.length === ROWS * COLUMNS) {
+      infoElement.text("The Game was drawn.");
+      moveIndicatorText.text("Last move");
+      playAgainButton.attr("class", "visible");
+    } else {
+      setTimeout(() => {
+        moveIndicatorCircle.attr(
+          "class",
+          player === "player-1" ? "player-2" : "player-1"
+        );
+        isAllowedToMove = true;
+      }, moveDuration);
+    }
     return;
   }
   setTimeout(() => {
@@ -144,6 +179,7 @@ const move = (column) => {
       const winningColor =
         moves[moves.length - 1].player === "player-1" ? "blue" : "red";
       infoElement.text(`Player ${winningColor} has won.`);
+      moveIndicatorText.text("Last move");
       playAgainButton.attr("class", "visible");
     }, ANIMTATION_DURATION);
   }, moveDuration);
@@ -221,6 +257,8 @@ const resetGame = () => {
   renderWin({ lane: [] });
   playAgainButton.attr("class", "hidden");
   setInfo();
+  moveIndicatorText.text("Next move");
+  moveIndicatorCircle.attr("class", "player-1");
   isAllowedToMove = true;
 };
 
