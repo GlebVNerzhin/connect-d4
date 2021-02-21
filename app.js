@@ -1,3 +1,14 @@
+const hasTouchScreen = "ontouchstart" in document.documentElement;
+const infoElement = d3.select("#info");
+const playAgainButton = d3.select("#play-again");
+const setInfo = () =>
+  infoElement.text(
+    hasTouchScreen
+      ? "Press a column in the upper row to make a move"
+      : "Press a column key or click on a column in the upper row to make a move."
+  );
+setInfo();
+
 const WIDTH = 700;
 const INNER_HEIGHT = 600;
 const COLUMNS = 7;
@@ -7,7 +18,7 @@ const ANIMTATION_DURATION = 1000;
 const MARGIN_BOTTOM = 50;
 
 let isAllowedToMove = true;
-const moves = [];
+let moves = [];
 
 const columnLength = WIDTH / COLUMNS;
 const rowLength = INNER_HEIGHT / ROWS;
@@ -96,7 +107,7 @@ const renderWin = (winner) => {
     .attr("cx", (cell) => getCenter(cell[1], columnLength))
     .attr("cy", (cell) => getCenter(cell[0], rowLength))
     .transition()
-    .duration(1000)
+    .duration(ANIMTATION_DURATION)
     .attr("r", (columnLength + rowLength) / 4);
 };
 
@@ -125,7 +136,15 @@ const move = (column) => {
     setTimeout(() => (isAllowedToMove = true), moveDuration);
     return;
   }
-  setTimeout(() => renderWin({ player, lane: winningLane }), moveDuration);
+  setTimeout(() => {
+    renderWin({ player, lane: winningLane });
+    setTimeout(() => {
+      const winningColor =
+        moves[moves.length - 1].player === "player-1" ? "blue" : "red";
+      infoElement.text(`Player ${winningColor} has won.`);
+      playAgainButton.attr("class", "visible");
+    }, ANIMTATION_DURATION);
+  }, moveDuration);
 };
 
 const checkForWinningLane = () => {
@@ -193,4 +212,14 @@ const getLanes = () => {
   );
 };
 
+const resetGame = () => {
+  moves = [];
+  renderMoves(moves);
+  renderWin({ lane: [] });
+  playAgainButton.attr("class", "hidden");
+  setInfo();
+  isAllowedToMove = true;
+};
+
 document.addEventListener("keydown", handleKeydown);
+playAgainButton.on("click", resetGame);

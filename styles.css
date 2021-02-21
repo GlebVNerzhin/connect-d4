@@ -1,12 +1,7 @@
 body {
-  height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-h1 {
-  text-align: center;
 }
 
 svg {
@@ -38,6 +33,22 @@ text {
 
 .container {
   width: 50%;
+}
+
+.hidden {
+  visibility: hidden;
+}
+
+.visible {
+  visibility: visible;
+}
+
+#info {
+  font-size: larger;
+}
+
+#play-again {
+  font-size: large;
 }
 
 @media only screen and (max-width: 480px) {
