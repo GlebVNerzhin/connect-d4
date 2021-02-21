@@ -4,8 +4,8 @@ const playAgainButton = d3.select("#play-again");
 const setInfo = () =>
   infoElement.text(
     hasTouchScreen
-      ? "Press a column in the upper row to make a move."
-      : "Press a column key or click on a column in the upper row to make a move."
+      ? "Press a cell in the upper row to make a move."
+      : "Press a number key or click a cell in the upper row to make a move."
   );
 setInfo();
 
@@ -15,7 +15,7 @@ const COLUMNS = 7;
 const ROWS = 6;
 const WINNING_SCORE = 4;
 const ANIMTATION_DURATION = 1000;
-const MARGIN_BOTTOM = 50;
+const MARGIN_BOTTOM = hasTouchScreen ? 0 : 50;
 
 let isAllowedToMove = true;
 let moves = [];
@@ -57,15 +57,17 @@ svg
 
 const getCenter = (target, length) => target * length - length / 2;
 
-const labelGroup = svg
-  .append("g")
-  .attr("transform", `translate(0, ${INNER_HEIGHT + MARGIN_BOTTOM / 1.5})`);
-labelGroup
-  .selectAll("text")
-  .data(columns)
-  .join("text")
-  .attr("x", (d) => getCenter(d, columnLength))
-  .text((d) => d);
+if (!hasTouchScreen) {
+  const labelGroup = svg
+    .append("g")
+    .attr("transform", `translate(0, ${INNER_HEIGHT + MARGIN_BOTTOM / 1.5})`);
+  labelGroup
+    .selectAll("text")
+    .data(columns)
+    .join("text")
+    .attr("x", (d) => getCenter(d, columnLength))
+    .text((d) => d);
+}
 
 const upperRowButtonGroup = svg.append("g").attr("class", "row-buttons");
 upperRowButtonGroup
