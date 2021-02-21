@@ -1,14 +1,22 @@
 const WIDTH = 700;
-const HEIGHT = 600;
+const INNER_HEIGHT = 600;
 const COLUMNS = 7;
 const ROWS = 6;
 const WINNING_SCORE = 4;
 const ANIMTATION_DURATION = 1000;
+const MARGIN_BOTTOM = 50;
+
+let isAllowedToMove = true;
+const moves = [];
 
 const columnLength = WIDTH / COLUMNS;
-const rowLength = HEIGHT / ROWS;
+const rowLength = INNER_HEIGHT / ROWS;
 const rows = d3.range(1, ROWS + 1);
 const columns = d3.range(1, COLUMNS + 1);
+
+const svg = d3
+  .selectAll("svg")
+  .attr("viewBox", `0 0 ${WIDTH} ${INNER_HEIGHT + MARGIN_BOTTOM}`);
 
 const lineGrid = [
   { type: "row", data: d3.range(ROWS + 1) },
@@ -17,17 +25,8 @@ const lineGrid = [
   const dimension = d.data.map((x) => ({ type: d.type, value: x }));
   return [...a, ...dimension];
 }, []);
-
-const svg = d3
-  .select("body")
-  .append("div")
-  .attr("class", "container")
-  .append("svg")
-  .attr("viewBox", `0 0 ${WIDTH} ${HEIGHT}`);
-
 const yAxisRows = (d) => d * rowLength;
 const xAxisColumns = (d) => d * columnLength;
-
 svg
   .selectAll("line")
   .data(lineGrid)
@@ -42,10 +41,34 @@ svg
     gridLine.type === "row" ? WIDTH : xAxisColumns(gridLine.value)
   )
   .attr("y2", (gridLine) =>
-    gridLine.type === "row" ? yAxisRows(gridLine.value) : HEIGHT
+    gridLine.type === "row" ? yAxisRows(gridLine.value) : INNER_HEIGHT
   );
 
 const getCenter = (target, length) => target * length - length / 2;
+
+const labelGroup = svg
+  .append("g")
+  .attr("transform", `translate(0, ${INNER_HEIGHT + MARGIN_BOTTOM / 1.5})`);
+labelGroup
+  .selectAll("text")
+  .data(columns)
+  .join("text")
+  .attr("x", (d) => getCenter(d, columnLength))
+  .text((d) => d);
+
+const upperRowButtonGroup = svg.append("g").attr("class", "row-buttons");
+upperRowButtonGroup
+  .selectAll("rect")
+  .data(columns)
+  .join("rect")
+  .attr("x", (d) => (d - 1) * columnLength)
+  .attr("y", 0)
+  .attr("width", columnLength)
+  .attr("height", rowLength)
+  .on("click", (_, d) => {
+    if (!isAllowedToMove) return;
+    move(d);
+  });
 
 const moveGroup = svg.append("g");
 const winnerGroup = svg.append("g");
@@ -77,19 +100,15 @@ const renderWin = (winner) => {
     .attr("r", (columnLength + rowLength) / 4);
 };
 
-let allowMove = true;
-
 const handleKeydown = (e) => {
-  if (!allowMove) return;
+  if (!isAllowedToMove) return;
   column = parseInt(e.key);
   if (!column | (column > COLUMNS)) return;
-  allowMove = false;
   move(column);
 };
 
-const moves = [];
-
 const move = (column) => {
+  isAllowedToMove = false;
   const player = moves.length % 2 ? "player-2" : "player-1";
   const columnState = moves
     .map((d) => d.target)
@@ -103,7 +122,7 @@ const move = (column) => {
   renderMoves(moves, moveDuration);
   const winningLane = checkForWinningLane();
   if (!winningLane) {
-    setTimeout(() => (allowMove = true), moveDuration);
+    setTimeout(() => (isAllowedToMove = true), moveDuration);
     return;
   }
   setTimeout(() => renderWin({ player, lane: winningLane }), moveDuration);
