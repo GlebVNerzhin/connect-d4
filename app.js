@@ -4,7 +4,7 @@ const playAgainButton = d3.select("#play-again");
 const setInfo = () =>
   infoElement.text(
     hasTouchScreen
-      ? "Press a column in the upper row to make a move"
+      ? "Press a column in the upper row to make a move."
       : "Press a column key or click on a column in the upper row to make a move."
   );
 setInfo();
@@ -155,15 +155,16 @@ const checkForWinningLane = () => {
       const occupier = getOccupier(cell);
       if (!occupier) {
         matches = [];
-      } else if (!matches.length) {
-        matches.push({ player: occupier, cell: cell });
-      } else if (matches[matches.length - 1].player === occupier) {
-        matches.push({ player: occupier, cell: cell });
+      } else if (
+        matches.length &&
+        occupier === matches[matches.length - 1].player
+      ) {
+        matches.push({ player: occupier, cell });
+        if (matches.length === WINNING_SCORE)
+          return matches.map((match) => match.cell);
       } else {
-        matches = [];
+        matches = [{ player: occupier, cell }];
       }
-      if (matches.length === WINNING_SCORE)
-        return matches.map((match) => match.cell);
     }
   }
   return false;
